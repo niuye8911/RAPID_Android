@@ -1,3 +1,8 @@
 An Android Version of RAPID Manager
 
+.aar is included in ./aar/, which can be loaded to your Android project directly
+
+source code is included in ./source/
+
 following commits will be uploaded with simple examples and more thorough comments
+
