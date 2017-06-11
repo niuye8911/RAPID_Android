@@ -1,4 +1,4 @@
-package com.example.liuliu.rsdglib;
+package edu.rutgers.liuliu.librapid;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -22,8 +22,8 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.example.liuliu.rsdglib.RSDGState.TRAINING;
-import static com.example.liuliu.rsdglib.RSDGState.TRAINING_DONE;
+import static edu.rutgers.liuliu.librapid.RSDGState.TRAINING;
+import static edu.rutgers.liuliu.librapid.RSDGState.TRAINING_DONE;
 import static java.lang.System.nanoTime;
 
 import java.io.BufferedReader;
@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,7 +46,7 @@ import java.util.TimerTask;
  * RSDG manager that register threads, keep track of budget, and etc..
  */
 
-public class RSDGMission {
+public class RSDGMission{
 
     /***
      * BOOKKEEPING
@@ -61,7 +62,7 @@ public class RSDGMission {
     Map<String, String> basicToService; //basic node->service
     Map<String, RSDGService> getService;
     Map<String, Pair<RSDGPara, Integer>> paraList; //basic node -> runnable+parameter+para_value
-    static Map<String, Integer> threadPref;
+    public static Map<String, Integer> threadPref;
     int freq;//frequency of server consulting
     public boolean offline;
     private Handler monitor;
@@ -71,6 +72,7 @@ public class RSDGMission {
     public RSDGState STATE;
     public Pair<String, Double> trainResult;
     private String name;
+    private Timer scheduler;
 
     /***
      * GRAPH RELATED
@@ -322,9 +324,11 @@ public class RSDGMission {
         Log.d("genProb", "generating problem");
         //if preference is provided through knobs
         Iterator it = threadPref.entrySet().iterator();
+
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             updateMV((String) pair.getKey(), (int) pair.getValue(), true);
+            Log.d("RSDGMISSION",pair.getKey() + " = " + pair.getValue());
         }
         inst.writeXMLFile("problem");
     }
@@ -360,32 +364,20 @@ public class RSDGMission {
         return threadPref.get(serviceName);
     }
 
-    private void setSolver() {
+    public void setSolver() {
         if (freq == 0) {
             return;
         } else {
             monitor = new Handler();
-            Timer timer_solve = new Timer();
+            scheduler = new Timer();
             TimerTask doAsynchronousTask = new TimerTask() {
                 @Override
                 public void run() {
                     monitor.postDelayed(new Runnable() {
                         public void run() {
                             try {
-                                double used = getConsumption(freq);
-                                double usedJoule = used * freq/1000;//in Joule
-                                budget -= usedJoule;
-                                double jouleLeft = budget;
-                                double usedTime = (System.nanoTime()-missionStartTime)/1000000000;
-                                timeleft -= usedTime;//in seconds
-                                missionStartTime = System.nanoTime();
-                                double mw = jouleLeft/timeleft*1000;
+                                double mw = updateBudget();
                                 setBudget((int)mw);
-                                Log.d("Battery","consumed"+used);
-                                Log.d("Battery","timeleft"+timeleft+"s,Jouleleft"+jouleLeft+"J,left:"+mw+"mw");
-                                Toast.makeText(ctx,
-                                        "Battery"+"timeleft"+timeleft+"s,Jouleleft"+jouleLeft+"J,left:"+mw+"mw",
-                                        Toast.LENGTH_LONG).show();
                                 consultServer(offline);
                                 applyResult();
                                 pinEnergy();
@@ -398,11 +390,29 @@ public class RSDGMission {
                     }, 0);
                 }
             };
-            timer_solve.schedule(doAsynchronousTask, 0, freq*1000); //execute in every freq ms
+            scheduler.schedule(doAsynchronousTask, 0, freq*1000); //execute in every freq ms
         }
     }
 
+    public double updateBudget(){
+        double used = getConsumption(freq);
+        double usedJoule = used * freq/1000;//in Joule
+        budget -= usedJoule;
+        double jouleLeft = budget;
+        double usedTime = (System.nanoTime()-missionStartTime)/1000000000;
+        timeleft -= usedTime;//in seconds
+        missionStartTime = System.nanoTime();
+        double mw = jouleLeft/timeleft*1000;
+        Log.d("Battery","consumed"+used);
+        Log.d("Battery","timeleft"+timeleft+"s,Jouleleft"+jouleLeft+"J,left:"+mw+"mw");
+        Toast.makeText(ctx,
+                "Battery"+"timeleft"+timeleft+"s,Jouleleft"+jouleLeft+"J,left:"+mw+"mw",
+                Toast.LENGTH_LONG).show();
+        return mw;
+    }
+
     public void cancel() {
+        scheduler.cancel();
         monitor.removeCallbacksAndMessages(null);
     }
 

@@ -1,4 +1,4 @@
-package com.example.liuliu.rsdglib;
+package edu.rutgers.liuliu.librapid;
 
 import android.content.Context;
 import android.media.audiofx.EnvironmentalReverb;
@@ -1098,11 +1098,8 @@ public class RSDG implements XML, Scheme {
         int c = 1;
         String constraint = "";
 
-        bufferedWriter.write("sys = 1\n");
-        bufferedWriter.write("comm = 1\n");
-        bufferedWriter.write("localization = 1\n");
-        bufferedWriter.write("info = 1\n");
-        bufferedWriter.write("screen = 1\n");
+        bufferedWriter.write("text = 1\n");
+        bufferedWriter.write("icon = 1\n");
         //1. All levels in a service - top node of service =0
         for (i = 0; i < graph_XML.size(); i++) {
             constraint = "c" + c + ": ";

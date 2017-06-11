@@ -1,16 +1,8 @@
-package com.example.liuliu.rsdglib;
-/* An sample GUI that
-1) Retrieves the threads(services) from RAPID manager,
-then show a know for each service
-log the knob value and return to caller(RAPID thread)
-2) Takes budget from user and return to caller
-* */
+package edu.rutgers.liuliu.librapid;
 
 import android.content.Intent;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -25,9 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.System.nanoTime;
-
-public class Config extends AppCompatActivity {
+public class DefaultConfig extends AppCompatActivity {
 
     List<Pair<Pair<RotaryKnobView, TextView>, String>> preferences;
     HashMap<String, TextView> serviceTextView;
@@ -101,9 +91,9 @@ public class Config extends AppCompatActivity {
             @Override
             public void onKnobChanged(int arg) {
                 String serviceName = jogView.getName();
-                Log.d("knob change", serviceName);
                 TextView textBox = serviceTextView.get(serviceName);
                 int newValue = RSDGMission.threadPref.get(serviceName) + arg;
+                Log.d("knob", serviceName + " change to "+newValue);
                 textBox.setText(serviceName + " => " + String.valueOf(newValue));
                 RSDGMission.threadPref.put(serviceName, newValue);
                 //preferences.get(i).first.second.
@@ -128,6 +118,10 @@ public class Config extends AppCompatActivity {
                 EditText unitLeft = (EditText) findViewById(R.id.unitLeft);
                 if (mission == null) Log.d("config", "mission is null");
                 budget = Integer.parseInt(unitLeft.getText().toString());
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("budget",budget);
+                setResult(0,returnIntent);
+                finish();
             }
         });
     }

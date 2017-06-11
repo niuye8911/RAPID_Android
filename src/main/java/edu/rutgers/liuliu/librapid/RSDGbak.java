@@ -1,4 +1,4 @@
-package com.example.liuliu.rsdglib;
+package edu.rutgers.liuliu.librapid;
 /*dummy file, just ignore this*/
 import android.os.Environment;
 import android.util.Log;

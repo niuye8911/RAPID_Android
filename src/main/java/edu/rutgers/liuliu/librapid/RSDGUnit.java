@@ -1,4 +1,4 @@
-package com.example.liuliu.rsdglib;
+package edu.rutgers.liuliu.librapid;
 
 /**
  * Created by Liu Liu on 2016/3/29 0029.
