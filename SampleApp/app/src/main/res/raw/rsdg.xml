@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <service>
+        <servicename>text</servicename>
+        <servicelayer><basicnode>
+            <nodename>normal</nodename><nodecost>500</nodecost>
+            <and><name>small</name><weight>0</weight></and>
+        </basicnode></servicelayer>
+        <servicelayer><basicnode>
+            <nodename>fast</nodename><nodecost>0</nodecost>
+            <and><name>big</name><weight>0</weight></and>
+        </basicnode></servicelayer>
+    </service>
+    <service>
+        <servicename>icon</servicename>
+        <servicelayer><basicnode>
+            <nodename>small</nodename><nodecost>0</nodecost>
+        </basicnode></servicelayer>
+        <servicelayer><basicnode>
+            <nodename>big</nodename><nodecost>0</nodecost>
+        </basicnode></servicelayer>
+    </service>
+</resources>
